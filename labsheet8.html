@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Student Portfolio Dashboard</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+<style>
+
+/* ---------- GLOBAL ---------- */
+
+body{
+margin:0;
+font-family:Segoe UI;
+background:#0a0015;
+color:white;
+}
+
+button{
+background:#8f00ff;
+border:none;
+padding:10px 16px;
+border-radius:6px;
+color:white;
+cursor:pointer;
+}
+
+button:hover{
+background:#b400ff;
+}
+
+input,textarea,select{
+width:90%;
+padding:8px;
+margin:6px;
+border-radius:5px;
+border:none;
+}
+
+/* ---------- LOGIN PAGE ---------- */
+
+#authPage{
+height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.authBox{
+background:#15002a;
+padding:35px;
+border-radius:10px;
+box-shadow:0 0 20px violet;
+width:320px;
+text-align:center;
+}
+
+.tabs{
+display:flex;
+justify-content:space-around;
+margin-bottom:10px;
+}
+
+.tab{
+cursor:pointer;
+}
+
+.form{display:none;}
+.form.active{display:block;}
+
+/* ---------- DASHBOARD ---------- */
+
+#dashboard{display:none;}
+
+.topbar{
+height:50px;
+background:#120020;
+display:flex;
+align-items:center;
+padding-left:15px;
+}
+
+.hamburger{
+font-size:22px;
+cursor:pointer;
+}
+
+.sidebar{
+width:220px;
+background:#140022;
+position:fixed;
+height:100vh;
+left:-220px;
+top:0;
+transition:0.3s;
+padding-top:60px;
+}
+
+.sidebar.active{
+left:0;
+}
+
+.sidebar button{
+display:block;
+width:90%;
+margin:10px auto;
+}
+
+.main{
+padding:20px;
+}
+
+/* ---------- DASHBOARD STATS ---------- */
+
+.stats{
+display:flex;
+gap:20px;
+flex-wrap:wrap;
+}
+
+.stat{
+background:#16002a;
+padding:20px;
+border-radius:10px;
+box-shadow:0 0 10px violet;
+}
+
+/* ---------- ID CARD ---------- */
+
+.card-container{
+display:flex;
+justify-content:center;
+margin-top:20px;
+perspective:1000px;
+}
+
+.id-card{
+width:420px;
+height:250px;
+position:relative;
+transform-style:preserve-3d;
+transition:1s;
+}
+
+.id-card:hover{
+transform:rotateY(180deg);
+}
+
+.face{
+position:absolute;
+width:100%;
+height:100%;
+border-radius:10px;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+backface-visibility:hidden;
+box-shadow:0 0 15px violet;
+}
+
+.face img{
+width:90px;
+height:90px;
+border-radius:50%;
+}
+
+.back{
+transform:rotateY(180deg);
+padding:10px;
+text-align:center;
+}
+
+/* ---------- VISITING CARD ---------- */
+
+.visit{
+width:300px;
+margin:auto;
+background:#15002a;
+padding:20px;
+border-radius:10px;
+box-shadow:0 0 10px violet;
+text-align:center;
+}
+
+/* ---------- RESUME ---------- */
+
+.resume{
+max-width:600px;
+margin:auto;
+padding:20px;
+border-radius:10px;
+}
+
+.r1{background:#1a0033;}
+.r2{background:white;color:black;}
+.r3{background:#002233;}
+.r4{background:#002b00;}
+.r5{background:#2b0000;}
+
+.gallery img{
+width:120px;
+margin:6px;
+border-radius:8px;
+box-shadow:0 0 8px violet;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN / REGISTER -->
+
+<div id="authPage">
+
+<div class="authBox">
+
+<div class="tabs">
+<div class="tab" onclick="switchTab('login')">Login</div>
+<div class="tab" onclick="switchTab('register')">Register</div>
+</div>
+
+<div id="login" class="form active">
+
+<input id="loginUser" placeholder="Username">
+<input id="loginPass" type="password" placeholder="Password">
+
+<button onclick="login()">Login</button>
+
+</div>
+
+<div id="register" class="form">
+
+<input id="regEmail" placeholder="Email">
+<input id="regUser" placeholder="Username">
+<input id="regPass" type="password" placeholder="Password">
+
+<button onclick="register()">Register</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- DASHBOARD -->
+
+<div id="dashboard">
+
+<div class="topbar">
+<div class="hamburger" onclick="toggleMenu()">☰</div>
+</div>
+
+<div class="sidebar" id="sidebar">
+
+<button onclick="show('home')">Home</button>
+<button onclick="show('id')">ID Card</button>
+<button onclick="show('visit')">Visiting Card</button>
+<button onclick="show('resume')">CV Builder</button>
+<button onclick="show('album')">Album</button>
+
+</div>
+
+<div class="main">
+
+<!-- HOME -->
+
+<div id="home">
+
+<h2>Dashboard</h2>
+
+<div class="stats">
+
+<div class="stat">
+<h3 id="idCount">0</h3>
+<p>ID Cards</p>
+</div>
+
+<div class="stat">
+<h3 id="resumeCount">0</h3>
+<p>Resumes</p>
+</div>
+
+<div class="stat">
+<h3 id="visitCount">0</h3>
+<p>Visiting Cards</p>
+</div>
+
+</div>
+
+</div>
+
+<!-- ID CARD -->
+
+<div id="id" style="display:none">
+
+<h2>ID Card Generator</h2>
+
+<input id="idName" placeholder="Student Name">
+<input id="idCollege" placeholder="College Name">
+<input id="idCourse" placeholder="Course">
+<input id="idBatch" placeholder="Batch">
+<input id="idDOB" placeholder="Date of Birth">
+
+<input id="idAddress" placeholder="Student Address">
+<input id="collegeAddress" placeholder="College Address">
+
+<label>ID Color</label>
+<input type="color" id="idColor">
+
+<input type="file" id="photo">
+
+<button onclick="generateID()">Generate</button>
+<button onclick="downloadID()">Download PNG</button>
+
+<div class="card-container">
+
+<div class="id-card" id="idCard">
+
+<div class="face" id="idFront">
+
+<h3 id="cardCollege">Id card</h3>
+
+<img id="cardPhoto" src="https://i.pravatar.cc/150">
+
+<h3 id="cardName"></h3>
+
+<p id="cardCourse"></p>
+<p id="cardBatch"></p>
+
+</div>
+
+<div class="face back">
+
+<p><b>DOB:</b> <span id="cardDOB"></span></p>
+
+<p><b>Address:</b></p>
+<p id="cardAddress"></p>
+
+<p><b>College Address:</b></p>
+<p id="cardCollegeAddress"></p>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- VISITING -->
+
+<div id="visit" style="display:none">
+
+<h2>Visiting Card</h2>
+
+<input id="vName" placeholder="Name">
+<input id="vRole" placeholder="Role">
+<input id="vCollege" placeholder="College">
+<input id="vEmail" placeholder="Email">
+<input id="vPhone" placeholder="Phone">
+
+<button onclick="createVisit()">Generate</button>
+<button onclick="downloadVisit()">Download</button>
+
+<div class="visit" id="visitCard">
+
+<h3 id="visitName"></h3>
+<p id="visitRole"></p>
+<p id="visitCollege"></p>
+<p id="visitEmail"></p>
+<p id="visitPhone"></p>
+
+</div>
+
+</div>
+
+<!-- RESUME -->
+
+<div id="resume" style="display:none">
+
+<h2>CV Builder</h2>
+
+<select id="template">
+<option value="r1">Template 1</option>
+<option value="r2">Template 2</option>
+<option value="r3">Template 3</option>
+<option value="r4">Template 4</option>
+<option value="r5">Template 5</option>
+</select>
+
+<input id="rName" placeholder="Name">
+<input id="rCollege" placeholder="College">
+<textarea id="rSkills" placeholder="Skills"></textarea>
+<textarea id="rProjects" placeholder="Projects"></textarea>
+<input id="rEmail" placeholder="Email">
+
+<button onclick="generateResume()">Generate</button>
+<button onclick="downloadResume()">Download PDF</button>
+
+<div id="resumePreview" class="resume r1">
+
+<h2 id="resName"></h2>
+
+<h3>College</h3>
+<p id="resCollege"></p>
+
+<h3>Skills</h3>
+<p id="resSkills"></p>
+
+<h3>Projects</h3>
+<p id="resProjects"></p>
+
+<h3>Email</h3>
+<p id="resEmail"></p>
+
+</div>
+
+</div>
+
+<!-- ALBUM -->
+
+<div id="album" style="display:none">
+
+<h2>Saved Album</h2>
+
+<div class="gallery" id="gallery"></div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+/* TAB SWITCH */
+
+function switchTab(tab){
+
+document.querySelectorAll(".form").forEach(f=>f.classList.remove("active"))
+
+document.getElementById(tab).classList.add("active")
+
+}
+
+/* REGISTER */
+
+function register(){
+
+let users=JSON.parse(localStorage.getItem("users")||"{}")
+
+users[regUser.value]={email:regEmail.value,password:regPass.value}
+
+localStorage.setItem("users",JSON.stringify(users))
+
+alert("Registered")
+
+}
+
+/* LOGIN */
+
+function login(){
+
+let users=JSON.parse(localStorage.getItem("users")||"{}")
+
+if(users[loginUser.value] && users[loginUser.value].password==loginPass.value){
+
+authPage.style.display="none"
+dashboard.style.display="block"
+
+}else{
+alert("Invalid Login")
+}
+
+}
+
+/* MENU */
+
+function toggleMenu(){
+
+sidebar.classList.toggle("active")
+
+}
+
+/* NAVIGATION */
+
+function show(id){
+
+["home","id","visit","resume","album"].forEach(s=>{
+document.getElementById(s).style.display="none"
+})
+
+document.getElementById(id).style.display="block"
+
+sidebar.classList.remove("active")
+
+}
+
+/* ID CARD */
+
+function generateID(){
+
+cardName.innerText=idName.value
+cardCourse.innerText=idCourse.value
+cardCollege.innerText=idCollege.value
+cardBatch.innerText="Batch: "+idBatch.value
+cardDOB.innerText=idDOB.value
+cardAddress.innerText=idAddress.value
+cardCollegeAddress.innerText=collegeAddress.value
+
+idFront.style.background=idColor.value
+
+let file=photo.files[0]
+
+if(file){
+
+let reader=new FileReader()
+
+reader.onload=e=>cardPhoto.src=e.target.result
+
+reader.readAsDataURL(file)
+
+}
+
+}
+
+function downloadID(){
+
+html2canvas(idCard).then(canvas=>{
+
+let img=canvas.toDataURL()
+
+let link=document.createElement("a")
+link.download="idcard.png"
+link.href=img
+link.click()
+
+saveAlbum(img)
+
+})
+
+}
+
+/* VISITING CARD */
+
+function createVisit(){
+
+visitName.innerText=vName.value
+visitRole.innerText=vRole.value
+visitCollege.innerText=vCollege.value
+visitEmail.innerText=vEmail.value
+visitPhone.innerText=vPhone.value
+
+}
+
+function downloadVisit(){
+
+html2canvas(visitCard).then(canvas=>{
+
+let img=canvas.toDataURL()
+
+let link=document.createElement("a")
+link.download="visitingcard.png"
+link.href=img
+link.click()
+
+saveAlbum(img)
+
+})
+
+}
+
+/* RESUME */
+
+function generateResume(){
+
+resumePreview.className="resume "+template.value
+
+resName.innerText=rName.value
+resCollege.innerText=rCollege.value
+resSkills.innerText=rSkills.value
+resProjects.innerText=rProjects.value
+resEmail.innerText=rEmail.value
+
+}
+
+function downloadResume(){
+
+html2pdf().from(resumePreview).save("resume.pdf")
+
+}
+
+/* ALBUM */
+
+function saveAlbum(img){
+
+let album=JSON.parse(localStorage.getItem("album")||"[]")
+
+album.push(img)
+
+localStorage.setItem("album",JSON.stringify(album))
+
+loadAlbum()
+
+}
+
+function loadAlbum(){
+
+let album=JSON.parse(localStorage.getItem("album")||"[]")
+
+gallery.innerHTML=""
+
+album.forEach(i=>{
+
+let img=document.createElement("img")
+img.src=i
+gallery.appendChild(img)
+
+})
+
+}
+
+loadAlbum()
+
+</script>
+
+</body>
+</html>
